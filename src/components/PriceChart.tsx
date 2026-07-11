@@ -77,6 +77,7 @@ export default function PriceChart({
   const liveLineRef = useRef<IPriceLine | null>(null);
   const fittedRef = useRef(false);
   const candleCountRef = useRef(0);
+  const firstOpenTimeRef = useRef<number | null>(null);
   const lastOpenTimeRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -123,8 +124,12 @@ export default function PriceChart({
 
     window.addEventListener("resize", handleResize);
 
+    const resizeObserver = new ResizeObserver(handleResize);
+    resizeObserver.observe(containerRef.current);
+
     return () => {
       window.removeEventListener("resize", handleResize);
+      resizeObserver.disconnect();
       levelLinesRef.current.forEach((line) => series.removePriceLine(line));
       levelLinesRef.current = [];
       if (liveLineRef.current) {
@@ -137,6 +142,7 @@ export default function PriceChart({
       seriesRef.current = null;
       fittedRef.current = false;
       candleCountRef.current = 0;
+      firstOpenTimeRef.current = null;
       lastOpenTimeRef.current = null;
     };
   }, []);
@@ -167,13 +173,17 @@ export default function PriceChart({
       close,
     };
 
-    const sameBar = lastOpenTimeRef.current === last.openTime;
+    const prevLen = candleCountRef.current;
+    const firstTime = candles[0].openTime;
+    const canIncremental =
+      prevLen > 0 &&
+      firstOpenTimeRef.current === firstTime &&
+      candles.length >= prevLen &&
+      candles.length <= prevLen + 1;
 
-    if (candleCountRef.current > 0) {
+    if (canIncremental) {
       series.update(bar);
-      if (!sameBar) {
-        lastOpenTimeRef.current = last.openTime;
-      }
+      lastOpenTimeRef.current = last.openTime;
     } else {
       series.setData(
         candles.map((c, i) => {
@@ -193,8 +203,10 @@ export default function PriceChart({
           };
         })
       );
+      firstOpenTimeRef.current = firstTime;
       lastOpenTimeRef.current = last.openTime;
-      if (!fittedRef.current) {
+
+      if (!fittedRef.current || prevLen !== candles.length) {
         chart.timeScale().fitContent();
         fittedRef.current = true;
       }
