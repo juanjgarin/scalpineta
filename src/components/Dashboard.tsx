@@ -311,8 +311,11 @@ export default function Dashboard() {
       <header className="mb-8 flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-sm font-medium text-amber-700/70">BTCUSDT Perpetual</p>
-          <h1 className="mt-1 text-3xl font-bold tracking-tight text-zinc-200">
-            La Scalpineta
+          <h1 className="mt-1 flex items-center gap-2 text-3xl font-bold tracking-tight text-zinc-200">
+            <span>La Scalpineta</span>
+            <span className="text-2xl leading-none" aria-hidden="true">
+              🧉🇦🇷
+            </span>
           </h1>
           <p className="mt-2 text-sm text-zinc-500">
             Barridos de liquidez y Turtle Soup · Binance Futures
@@ -522,7 +525,7 @@ export default function Dashboard() {
             rel="noopener noreferrer"
             className="text-zinc-500 underline decoration-zinc-700/60 underline-offset-2 transition-colors hover:text-amber-700/70 hover:decoration-amber-800/40"
           >
-            GitHub
+            GitHub Scalpineta Repo
           </a>
         </p>
       </footer>

@@ -46,6 +46,6 @@ Proof of concept for informational purposes only. Not financial advice. No trade
 
 ## Repository
 
-[github.com/juanjgarin/scalpineta](https://github.com/juanjgarin/scalpineta)
+[GitHub Scalpineta Repo](https://github.com/juanjgarin/scalpineta)
 
 Made by [Garincho](https://jgarin.com/)
