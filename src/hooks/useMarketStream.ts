@@ -16,7 +16,7 @@ import { detectPreview, detectSignals, signalKey } from "@/lib/patterns";
 import type { Candle, Interval, Signal, SignalsResponse } from "@/lib/types";
 
 const TICK_MS = 1000;
-const API_SYNC_MS = 5000;
+const API_SYNC_MS = 3000;
 
 interface TickResponse {
   price: number;
