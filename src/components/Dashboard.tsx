@@ -515,6 +515,15 @@ export default function Dashboard() {
           >
             Garincho
           </a>
+          {" · "}
+          <a
+            href="https://github.com/juanjgarin/scalpineta"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-zinc-500 underline decoration-zinc-700/60 underline-offset-2 transition-colors hover:text-amber-700/70 hover:decoration-amber-800/40"
+          >
+            GitHub
+          </a>
         </p>
       </footer>
     </div>

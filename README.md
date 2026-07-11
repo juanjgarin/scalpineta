@@ -43,3 +43,9 @@ Tune detection in `src/lib/patterns.ts`:
 ## Disclaimer
 
 Proof of concept for informational purposes only. Not financial advice. No trades are executed. Use at your own risk.
+
+## Repository
+
+[github.com/juanjgarin/scalpineta](https://github.com/juanjgarin/scalpineta)
+
+Made by [Garincho](https://jgarin.com/)
