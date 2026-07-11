@@ -1,6 +1,10 @@
 import type { Candle, Interval } from "./types";
 
+/** BTCUSDT USDT-M Perpetual (Binance Futures) */
+export const SYMBOL = "BTCUSDT";
+
 const BINANCE_FUTURES = "https://fapi.binance.com";
+const BINANCE_FUTURES_WS = "wss://fstream.binance.com";
 const FETCH_TIMEOUT_MS = 8000;
 
 async function binanceFetch(url: string): Promise<Response> {
@@ -24,7 +28,7 @@ export async function fetchKlines(
   interval: Interval,
   limit = 200
 ): Promise<Candle[]> {
-  const url = `${BINANCE_FUTURES}/fapi/v1/klines?symbol=BTCUSDT&interval=${interval}&limit=${limit}`;
+  const url = `${BINANCE_FUTURES}/fapi/v1/klines?symbol=${SYMBOL}&interval=${interval}&limit=${limit}`;
   const res = await binanceFetch(url);
   const data: (string | number)[][] = await res.json();
 
@@ -41,7 +45,7 @@ export async function fetchKlines(
 }
 
 export async function fetchMarkPrice(): Promise<number> {
-  const url = `${BINANCE_FUTURES}/fapi/v1/premiumIndex?symbol=BTCUSDT`;
+  const url = `${BINANCE_FUTURES}/fapi/v1/premiumIndex?symbol=${SYMBOL}`;
   const res = await binanceFetch(url);
   const data = await res.json();
   return parseFloat(data.markPrice);
@@ -72,7 +76,8 @@ export function klineEventToCandle(k: BinanceKlineEvent): Candle {
 }
 
 export function binanceWsUrl(interval: Interval): string {
-  const kline = `btcusdt@kline_${interval}`;
-  const mark = "btcusdt@markPrice@1s";
-  return `wss://fstream.binance.com/stream?streams=${kline}/${mark}`;
+  const sym = SYMBOL.toLowerCase();
+  const kline = `${sym}@kline_${interval}`;
+  const mark = `${sym}@markPrice@1s`;
+  return `${BINANCE_FUTURES_WS}/stream?streams=${kline}/${mark}`;
 }

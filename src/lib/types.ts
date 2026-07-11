@@ -12,7 +12,7 @@ export interface Candle {
 
 export type SignalType = "BUY" | "SELL";
 export type PatternType = "SWEEP" | "TURTLE_SOUP";
-export type Interval = "1m" | "5m" | "15m";
+export type Interval = "1m" | "5m" | "15m" | "30m" | "1h" | "4h" | "1d";
 
 export interface TakeProfits {
   r1: number;

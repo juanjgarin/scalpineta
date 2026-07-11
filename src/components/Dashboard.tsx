@@ -10,9 +10,18 @@ import {
   type SignalResolution,
 } from "@/lib/hits";
 import { signalKey } from "@/lib/patterns";
+import { DEFAULT_INTERVAL, INTERVALS } from "@/lib/intervals";
 import type { Candle, Interval, Signal } from "@/lib/types";
 
-const INTERVALS: Interval[] = ["1m", "5m", "15m"];
+const INTERVAL_LABELS: Record<Interval, string> = {
+  "1m": "1m",
+  "5m": "5m",
+  "15m": "15m",
+  "30m": "30m",
+  "1h": "1h",
+  "4h": "4h",
+  "1d": "1D",
+};
 
 function formatPrice(value: number) {
   return value.toLocaleString("en-US", {
@@ -243,7 +252,7 @@ const EMPTY_RESOLUTION: SignalResolution = {
 };
 
 export default function Dashboard() {
-  const [interval, setInterval] = useState<Interval>("5m");
+  const [interval, setInterval] = useState<Interval>(DEFAULT_INTERVAL);
   const [selectedSignal, setSelectedSignal] = useState<Signal | null>(null);
 
   const {
@@ -344,18 +353,18 @@ export default function Dashboard() {
         </div>
       )}
 
-      <div className="mb-6 flex gap-2">
+      <div className="mb-6 flex flex-wrap gap-2">
         {INTERVALS.map((tf) => (
           <button
             key={tf}
             onClick={() => setInterval(tf)}
-            className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+            className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors sm:px-4 ${
               interval === tf
                 ? "bg-amber-900/35 text-amber-200/80"
                 : "bg-zinc-800/40 text-zinc-500 hover:bg-zinc-800/70 hover:text-zinc-400"
             }`}
           >
-            {tf}
+            {INTERVAL_LABELS[tf]}
           </button>
         ))}
       </div>

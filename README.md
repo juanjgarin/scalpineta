@@ -1,6 +1,6 @@
 # La Scalpineta
 
-PoC scalping signals for **BTCUSDT Perpetual** (Binance Futures) on **1m**, **5m**, and **15m** timeframes.
+PoC scalping signals for **BTCUSDT Perpetual** (Binance Futures) on **1m**, **5m**, **15m**, **30m**, **1h**, **4h**, and **1D** timeframes.
 
 Detects **liquidity sweeps** and **Turtle Soup** patterns with a live chart, SL/TP levels, and signal outcome tracking.
 
@@ -28,8 +28,8 @@ Open [http://localhost:3000](http://localhost:3000).
 ## API
 
 ```
-GET /api/signals?interval=1m|5m|15m
-GET /api/tick?interval=1m|5m|15m
+GET /api/signals?interval=1m|5m|15m|30m|1h|4h|1d
+GET /api/tick?interval=1m|5m|15m|30m|1h|4h|1d
 ```
 
 `/api/signals` — full snapshot: mark price, candles, detected signals.  

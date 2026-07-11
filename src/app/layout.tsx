@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "La Scalpineta",
   description:
-    "PoC scalping signals for BTCUSDT Perpetual — liquidity sweeps & turtle soup on 1m, 5m, 15m. Not financial advice.",
+    "PoC scalping signals for BTCUSDT Perpetual — liquidity sweeps & turtle soup on 1m–1D. Not financial advice.",
 };
 
 export default function RootLayout({
