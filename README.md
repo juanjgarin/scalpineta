@@ -1,32 +1,35 @@
 # La Scalpineta
 
-App simple en Next.js que detecta **barridos de liquidez** y **Turtle Soup** en BTCUSDT Perpetual (Binance Futures) para scalping en **1m**, **5m** y **15m**.
+PoC scalping signals for **BTCUSDT Perpetual** (Binance Futures) on **1m**, **5m**, and **15m** timeframes.
 
-## Qué detecta
+Detects **liquidity sweeps** and **Turtle Soup** patterns with a live chart, SL/TP levels, and signal outcome tracking.
 
-- **Barrido (Sweep)**: la vela barre un máximo/mínimo reciente con mecha y cierra del otro lado → señal de reversión.
-- **Turtle Soup**: falso quiebre del máximo/mínimo de las últimas 20 velas → señal contraria.
-- **Gráfico de velas** con marcadores en cada señal (B = barrido, TS = turtle soup).
-- **SL / TP** calculados en 1:1, 1:2 y 1:3 (SL debajo/sobre la mecha barrida). Click en una señal para ver las líneas en el gráfico.
-- **Tiempo real** vía WebSocket de Binance (precio ~1s, velas en vivo, señal al cierre instantánea).
-- **Preview** tentativo en la vela abierta antes del cierre.
+## Features
 
-## Desarrollo local
+- **Liquidity sweep** — wick beyond a recent swing high/low, close back inside → reversal signal
+- **Turtle Soup** — false break of the 20-candle high/low → counter-trend signal
+- **Live candlestick chart** with COMPRA/VENTA markers
+- **SL / TP** at 1:1, 1:2, and 1:3 (SL below/above the sweep wick). Click a signal to draw levels on the chart
+- **Real-time updates** — mark price and active candle refresh every ~1s via Binance API
+- **Preview** — tentative signal on the open candle before close
+- **History** — active vs closed signals (SL HIT or TP 1:1 / 1:2 / 1:3)
+
+## Local development
 
 ```bash
 npm install
 npm run dev
 ```
 
-Abrí [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:3000](http://localhost:3000).
 
-## Deploy en Vercel
+## Deploy on Vercel
 
-1. Subí el repo a GitHub.
-2. Entrá a [vercel.com/new](https://vercel.com/new) e importá el proyecto.
-3. Deploy — no necesita variables de entorno (usa la API pública de Binance).
+1. Push this repo to GitHub
+2. Go to [vercel.com/new](https://vercel.com/new) and import the project
+3. Deploy — no environment variables required (public Binance API)
 
-O con CLI:
+Or with CLI:
 
 ```bash
 npx vercel
@@ -36,10 +39,21 @@ npx vercel
 
 ```
 GET /api/signals?interval=1m|5m|15m
+GET /api/tick?interval=1m|5m|15m
 ```
 
-Respuesta JSON con precio mark, señales recientes y la más reciente.
+`/api/signals` — full snapshot: mark price, candles, detected signals.  
+`/api/tick` — lightweight 1s poll: mark price + latest candles.
 
-## Nota
+## Configuration
 
-Esto es **solo informativo**. No ejecuta trades. Ajustá los parámetros en `src/lib/patterns.ts` si querés afinar la detección.
+Tune detection in `src/lib/patterns.ts`:
+
+- `SWEEP_LOOKBACK` — swing level lookback (default 15)
+- `TURTLE_PERIOD` — Turtle Soup period (default 20)
+
+## Disclaimer
+
+Proof of concept for informational purposes only. Not financial advice. No trades are executed. Use at your own risk.
+
+Made by [Garincho](https://jgarin.com/)

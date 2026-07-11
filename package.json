@@ -1,6 +1,7 @@
 {
   "name": "la-scalpineta",
   "version": "0.1.0",
+  "description": "PoC scalping signals for BTCUSDT — liquidity sweeps & turtle soup on 1m/5m/15m. Not financial advice.",
   "private": true,
   "scripts": {
     "dev": "next dev",
