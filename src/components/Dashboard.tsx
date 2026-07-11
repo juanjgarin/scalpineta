@@ -333,7 +333,7 @@ export default function Dashboard() {
               connected ? "animate-pulse bg-teal-600/60" : "bg-zinc-700"
             }`}
           />
-          {connected ? "Live · 1s" : "Reconectando..."}
+          {connected ? "Live · 3s" : "Reconectando..."}
         </div>
       </header>
 
