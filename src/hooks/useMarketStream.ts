@@ -16,6 +16,7 @@ import { detectPreview, detectSignals, signalKey } from "@/lib/patterns";
 import type { Candle, Interval, Signal, SignalsResponse } from "@/lib/types";
 
 const TICK_MS = 1000;
+const API_SYNC_MS = 5000;
 
 interface TickResponse {
   price: number;
@@ -50,8 +51,10 @@ export function useMarketStream(interval: Interval): MarketStreamState {
   const knownSignalsRef = useRef<Set<string>>(new Set());
   const lastOpenTimeRef = useRef<number | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
+  const wsLiveRef = useRef(false);
   const alertTimerRef = useRef<number | null>(null);
   const tickBusyRef = useRef(false);
+  const apiFailCountRef = useRef(0);
 
   const notifyNewSignals = useCallback((nextCandles: Candle[]) => {
     const confirmed = detectSignals(nextCandles);
@@ -75,18 +78,18 @@ export function useMarketStream(interval: Interval): MarketStreamState {
       setPrice(tick.price);
       setUpdatedAt(tick.updatedAt);
       setTickCount((n) => n + 1);
+      apiFailCountRef.current = 0;
 
       setCandles((prev) => {
         const prevLastTime = prev[prev.length - 1]?.openTime ?? null;
         const next = applyMarketCandles(prev, tick.candles, tick.price);
         const nextLastTime = next[next.length - 1]?.openTime ?? null;
 
-        const candleRotated =
+        if (
           prevLastTime != null &&
           nextLastTime != null &&
-          nextLastTime > prevLastTime;
-
-        if (candleRotated) {
+          nextLastTime > prevLastTime
+        ) {
           lastOpenTimeRef.current = nextLastTime;
           queueMicrotask(() => notifyNewSignals(next));
         }
@@ -116,8 +119,14 @@ export function useMarketStream(interval: Interval): MarketStreamState {
       knownSignalsRef.current = new Set(json.signals.map(signalKey));
       lastOpenTimeRef.current =
         json.candles[json.candles.length - 1]?.openTime ?? null;
+      apiFailCountRef.current = 0;
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al cargar datos");
+      const msg = err instanceof Error ? err.message : "Error al cargar datos";
+      setError(
+        wsLiveRef.current
+          ? `API no disponible — usando WebSocket directo (${msg})`
+          : msg
+      );
     } finally {
       setLoading(false);
     }
@@ -131,14 +140,18 @@ export function useMarketStream(interval: Interval): MarketStreamState {
       const res = await fetch(`/api/tick?interval=${interval}`, {
         cache: "no-store",
       });
-      if (!res.ok) return;
+      if (!res.ok) {
+        apiFailCountRef.current += 1;
+        return;
+      }
 
       const tick: TickResponse = await res.json();
       applyMarketTick(tick);
-      setConnected(true);
-      setError(null);
+      setError((prev) =>
+        prev?.startsWith("API no disponible") ? null : prev
+      );
     } catch {
-      setConnected(false);
+      apiFailCountRef.current += 1;
     } finally {
       tickBusyRef.current = false;
     }
@@ -148,16 +161,27 @@ export function useMarketStream(interval: Interval): MarketStreamState {
     setLoading(true);
     setCandles([]);
     setConnected(false);
+    wsLiveRef.current = false;
     knownSignalsRef.current = new Set();
     lastOpenTimeRef.current = null;
+    apiFailCountRef.current = 0;
     loadHistory();
   }, [interval, loadHistory]);
 
   useEffect(() => {
     pollTick();
-    const timer = window.setInterval(pollTick, TICK_MS);
+    const timer = window.setInterval(pollTick, API_SYNC_MS);
     return () => window.clearInterval(timer);
   }, [pollTick]);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      if (price != null) {
+        setTickCount((n) => n + 1);
+      }
+    }, TICK_MS);
+    return () => window.clearInterval(timer);
+  }, [price]);
 
   useEffect(() => {
     let alive = true;
@@ -178,6 +202,10 @@ export function useMarketStream(interval: Interval): MarketStreamState {
           setPrice(mark);
           setUpdatedAt(Date.now());
           setCandles((prev) => syncLastCandleWithMark(prev, mark));
+          setConnected(true);
+          setError((prev) =>
+            prev?.startsWith("API no disponible") ? null : prev
+          );
           return;
         }
 
@@ -200,6 +228,7 @@ export function useMarketStream(interval: Interval): MarketStreamState {
 
             return next;
           });
+          setConnected(true);
         }
       } catch {
         // ignorar mensaje malformado
@@ -207,17 +236,22 @@ export function useMarketStream(interval: Interval): MarketStreamState {
     };
 
     ws.onopen = () => {
-      if (alive) setConnected(true);
+      if (!alive) return;
+      wsLiveRef.current = true;
+      setConnected(true);
     };
 
     ws.onclose = () => {
-      if (alive) setConnected(false);
+      if (!alive) return;
+      wsLiveRef.current = false;
+      setConnected(false);
     };
 
     wsRef.current = ws;
 
     return () => {
       alive = false;
+      wsLiveRef.current = false;
       ws.close();
       wsRef.current = null;
       if (alertTimerRef.current) {

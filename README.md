@@ -23,6 +23,8 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
+> **Vercel:** API routes run in `gru1` (São Paulo) because Binance blocks US datacenter IPs. The browser WebSocket connects directly to Binance as a fallback.
+
 ## API
 
 ```

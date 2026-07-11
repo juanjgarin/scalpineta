@@ -1,19 +1,31 @@
 import type { Candle, Interval } from "./types";
 
 const BINANCE_FUTURES = "https://fapi.binance.com";
+const FETCH_TIMEOUT_MS = 8000;
+
+async function binanceFetch(url: string): Promise<Response> {
+  const res = await fetch(url, {
+    cache: "no-store",
+    headers: { Accept: "application/json" },
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(
+      `Binance API error ${res.status}${text ? `: ${text.slice(0, 120)}` : ""}`
+    );
+  }
+
+  return res;
+}
 
 export async function fetchKlines(
   interval: Interval,
   limit = 200
 ): Promise<Candle[]> {
   const url = `${BINANCE_FUTURES}/fapi/v1/klines?symbol=BTCUSDT&interval=${interval}&limit=${limit}`;
-
-  const res = await fetch(url, { cache: "no-store" });
-
-  if (!res.ok) {
-    throw new Error(`Binance API error: ${res.status}`);
-  }
-
+  const res = await binanceFetch(url);
   const data: (string | number)[][] = await res.json();
 
   return data.map((k, i) => ({
@@ -30,12 +42,7 @@ export async function fetchKlines(
 
 export async function fetchMarkPrice(): Promise<number> {
   const url = `${BINANCE_FUTURES}/fapi/v1/premiumIndex?symbol=BTCUSDT`;
-  const res = await fetch(url, { cache: "no-store" });
-
-  if (!res.ok) {
-    throw new Error(`Binance API error: ${res.status}`);
-  }
-
+  const res = await binanceFetch(url);
   const data = await res.json();
   return parseFloat(data.markPrice);
 }
