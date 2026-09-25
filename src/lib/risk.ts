@@ -13,7 +13,7 @@ export const SL_ATR_BUFFER = 0.75;
  * máxima ronda ~20%, con 0.5% ~10–12% (backtest + Monte Carlo).
  */
 export const DEFAULT_RISK_PCT = 1;
-export const MAX_RISK_PCT = 5;
+export const MAX_RISK_PCT = 10;
 
 export const DEFAULT_CAPITAL = 1000;
 

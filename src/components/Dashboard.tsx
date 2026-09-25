@@ -59,6 +59,27 @@ const LEVERAGE_STORAGE_KEY = "scalpineta:leverage";
 const RISK_STORAGE_KEY = "scalpineta:risk-pct";
 const CURRENT_TRADE_STORAGE_KEY = "scalpineta:current-trade";
 const RISK_PRESETS = [0.25, 0.5, 1, 2];
+
+/**
+ * Caída máxima esperable según el riesgo por operación (backtest de 255
+ * operaciones + Monte Carlo al 95%). Arriba de ~3% una racha normal ya se
+ * lleva media cuenta.
+ */
+const DRAWDOWN_BY_RISK: [number, string][] = [
+  [1, "20%"],
+  [2, "35–40%"],
+  [3, "50%"],
+  [5, "70%"],
+  [7, "80–85%"],
+  [10, "90–95%"],
+];
+
+function drawdownEstimate(riskPct: number) {
+  return (
+    DRAWDOWN_BY_RISK.find(([r]) => riskPct <= r) ??
+    DRAWDOWN_BY_RISK[DRAWDOWN_BY_RISK.length - 1]
+  )[1];
+}
 /** Caída máxima esperable en una racha mala (backtest + Monte Carlo) */
 const RISK_HINTS: Record<number, string> = {
   0.25: "Muy conservador: caída máxima ~5–6% en rachas malas",
@@ -1034,7 +1055,7 @@ function AccountForm({
       {riskOk && riskPct > 1 && (
         <p className="mt-3 text-xs text-muted">
           ⚠ Con {riskPct}% una racha mala normal (11–16 pérdidas seguidas con
-          win rate ~35%) puede bajar la cuenta ~{riskPct >= 2 ? "35–40" : "20–35"}%.
+          win rate ~35%) puede bajar la cuenta ~{drawdownEstimate(riskPct)}.
         </p>
       )}
 
