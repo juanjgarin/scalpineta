@@ -32,7 +32,20 @@ export function mergeCandles(candles: Candle[], incoming: Candle[]): Candle[] {
   return result;
 }
 
-export const CHART_CANDLES = 120;
+/**
+ * Identifica el tramo de velas cerradas: cambia solo cuando cierra una vela o
+ * se recorta el histórico, no con cada tick del mark price sobre la vela abierta.
+ */
+export function closedSignature(candles: Candle[]): string {
+  let last = candles.length - 1;
+  while (last >= 0 && candles[last].closed === false) last--;
+  if (last < 0) return "empty";
+  const c = candles[last];
+  return `${candles[0].openTime}:${last}:${c.openTime}:${c.close}:${c.high}:${c.low}:${c.volume}`;
+}
+
+/** Máximo que Binance devuelve en un solo pedido de klines */
+export const CHART_CANDLES = 1500;
 
 export function trimCandles(candles: Candle[], limit = CHART_CANDLES): Candle[] {
   return candles.length > limit ? candles.slice(-limit) : candles;

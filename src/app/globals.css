@@ -1,19 +1,131 @@
 @import "tailwindcss";
 
+/* Sistema Kraken — mismos tokens que la Kraken Style Reference */
 :root {
-  --background: #09090b;
-  --foreground: #fafafa;
+  --color-near-black: #101114;
+  --color-cool-gray: #686b82;
+  --color-silver-blue: #9497a9;
+  --color-border-gray: #dedee5;
+  --color-slate: #484b5e;
+
+  /* superficies (claro) */
+  --bg: #ffffff;
+  --surface: #faf9fe;
+  --surface-sink: #f2f0fb;
+  --text: var(--color-near-black);
+  --text-muted: var(--color-cool-gray);
+  --text-faint: var(--color-silver-blue);
+  --border: var(--color-border-gray);
+  --border-strong: #cfcfda;
+
+  /* marca */
+  --accent: #7132f5;
+  --accent-hover: #5741d8;
+  --accent-press: #5b1ecf;
+  --accent-wash: rgba(133, 91, 251, 0.16);
+
+  /* semántica: un solo verde para subas, slate para bajas */
+  --positive: #149e61;
+  --positive-deep: #026b3f;
+  --positive-wash: rgba(20, 158, 97, 0.16);
+  --negative: var(--color-slate);
+  --negative-wash: rgba(104, 107, 130, 0.12);
+  --whisper: rgba(148, 151, 169, 0.08);
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0b0c0f;
+    --surface: #141519;
+    --surface-sink: #1b1c22;
+    --text: #f3f3f6;
+    --text-muted: #a1a4b6;
+    --text-faint: #74778c;
+    --border: #2a2b33;
+    --border-strong: #3a3b45;
+    --accent: #9a6bff;
+    --accent-hover: #ac84ff;
+    --accent-press: #c0a3ff;
+    --accent-wash: rgba(133, 91, 251, 0.22);
+    --positive: #2bb673;
+    --positive-deep: #63d29b;
+    --positive-wash: rgba(43, 182, 115, 0.18);
+    --negative: #a1a4b6;
+    --negative-wash: rgba(148, 151, 169, 0.14);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #0b0c0f;
+  --surface: #141519;
+  --surface-sink: #1b1c22;
+  --text: #f3f3f6;
+  --text-muted: #a1a4b6;
+  --text-faint: #74778c;
+  --border: #2a2b33;
+  --border-strong: #3a3b45;
+  --accent: #9a6bff;
+  --accent-hover: #ac84ff;
+  --accent-press: #c0a3ff;
+  --accent-wash: rgba(133, 91, 251, 0.22);
+  --positive: #2bb673;
+  --positive-deep: #63d29b;
+  --positive-wash: rgba(43, 182, 115, 0.18);
+  --negative: #a1a4b6;
+  --negative-wash: rgba(148, 151, 169, 0.14);
+  color-scheme: dark;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-sink: var(--surface-sink);
+  --color-ink: var(--text);
+  --color-muted: var(--text-muted);
+  --color-faint: var(--text-faint);
+  --color-line: var(--border);
+  --color-line-strong: var(--border-strong);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-press: var(--accent-press);
+  --color-accent-wash: var(--accent-wash);
+  --color-positive: var(--positive);
+  --color-positive-deep: var(--positive-deep);
+  --color-positive-wash: var(--positive-wash);
+  --color-negative: var(--negative);
+  --color-negative-wash: var(--negative-wash);
+  --color-whisper: var(--whisper);
+
+  --font-brand: var(--font-inter), system-ui, sans-serif;
+  --font-sans: var(--font-plex-sans), var(--font-inter), system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, "SFMono-Regular", monospace;
+
+  /* radios Kraken: sm 2 · xl 6 (cards/inputs) · lg 9 (botones/badges) */
+  --radius-sm: 2px;
+  --radius-card: 6px;
+  --radius-pill: 9px;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans), system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.38;
 }
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+

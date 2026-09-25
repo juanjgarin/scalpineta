@@ -1,33 +1,57 @@
-/** Paleta tenue compartida (UI + gráfico) */
+/**
+ * Paleta del gráfico leída de los tokens Kraken (globals.css), así sigue al
+ * tema claro/oscuro. lightweight-charts necesita colores resueltos, no var().
+ */
+export interface ChartPalette {
+  bg: string;
+  grid: string;
+  text: string;
+  up: string;
+  down: string;
+  markerBuy: string;
+  markerSell: string;
+  markerPreview: string;
+  markerTs: string;
+  entry: string;
+  sl: string;
+  slHit: string;
+  tp: string;
+  tpHit: string;
+  live: string;
+  fontFamily: string;
+}
 
-export const chart = {
-  bg: "#141416",
-  grid: "#1f1f23",
-  text: "#8a8a93",
-  up: "#5a7d6a",
-  down: "#8a6565",
-  wickUp: "#5a7d6a",
-  wickDown: "#8a6565",
-  markerBuy: "#6b9178",
-  markerSell: "#9a7373",
-  markerPreview: "#6b6b75",
-  entry: "#8a7d62",
-  entryHit: "#a89470",
-  sl: "#7a5c5c",
-  slHit: "#a87878",
-  tp: "#5c7568",
-  tpHit: "#7a9a88",
-  live: "#6a7580",
-} as const;
+function token(styles: CSSStyleDeclaration, name: string, fallback: string) {
+  return styles.getPropertyValue(name).trim() || fallback;
+}
 
-export const ui = {
-  buyText: "text-emerald-600/80",
-  sellText: "text-rose-600/80",
-  buyBorder: "border-emerald-900/25 bg-emerald-950/15",
-  sellBorder: "border-rose-900/25 bg-rose-950/15",
-  slMuted: "text-rose-400/50",
-  slHit: "text-rose-400/90 bg-rose-950/35 ring-1 ring-rose-800/30",
-  entryMuted: "text-amber-200/45",
-  tpMuted: "text-teal-400/45",
-  tpHit: "text-teal-400/85 bg-teal-950/30 ring-1 ring-teal-800/25",
-} as const;
+export function readChartPalette(): ChartPalette {
+  const s = getComputedStyle(document.documentElement);
+  const positive = token(s, "--positive", "#149e61");
+  const negative = token(s, "--negative", "#484b5e");
+  const accent = token(s, "--accent", "#7132f5");
+  const muted = token(s, "--text-muted", "#686b82");
+  const faint = token(s, "--text-faint", "#9497a9");
+
+  return {
+    bg: token(s, "--surface", "#faf9fe"),
+    grid: token(s, "--border", "#dedee5"),
+    text: muted,
+    up: positive,
+    down: negative,
+    markerBuy: positive,
+    markerSell: negative,
+    markerPreview: faint,
+    markerTs: accent,
+    entry: accent,
+    sl: faint,
+    slHit: token(s, "--text", "#101114"),
+    tp: positive,
+    tpHit: token(s, "--positive-deep", "#026b3f"),
+    live: muted,
+    fontFamily: `${token(s, "--font-plex-mono", "")}, ui-monospace, monospace`.replace(
+      /^, /,
+      ""
+    ),
+  };
+}

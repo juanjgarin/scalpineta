@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { fetchKlines, fetchMarkPrice, SYMBOL } from "@/lib/binance";
-import { normalizeClosed, trimCandles } from "@/lib/candles";
+import { CHART_CANDLES, normalizeClosed } from "@/lib/candles";
 import { DEFAULT_INTERVAL, INTERVALS, parseInterval } from "@/lib/intervals";
 import { detectSignals } from "@/lib/patterns";
 import type { SignalsResponse } from "@/lib/types";
@@ -23,19 +23,19 @@ export async function GET(request: NextRequest) {
 
   try {
     const [candles, price] = await Promise.all([
-      fetchKlines(interval),
+      fetchKlines(interval, CHART_CANDLES),
       fetchMarkPrice(),
     ]);
 
     const allCandles = normalizeClosed(candles);
-    const signals = detectSignals(allCandles);
+    const signals = detectSignals(allCandles, interval);
 
     const body: SignalsResponse = {
       symbol: SYMBOL,
       interval,
       price,
       updatedAt: Date.now(),
-      candles: trimCandles(allCandles),
+      candles: allCandles,
       signals,
       latest: signals[0] ?? null,
     };

@@ -1,15 +1,26 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { IBM_Plex_Mono, IBM_Plex_Sans, Inter } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+/** Kraken-Brand → Inter (títulos) */
+const brand = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
+  weight: ["600", "700"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+/** Kraken-Product → IBM Plex Sans (interfaz) */
+const product = IBM_Plex_Sans({
+  variable: "--font-plex-sans",
   subsets: ["latin"],
+  weight: ["400", "500", "600"],
+});
+
+/** Datos y precios → IBM Plex Mono */
+const data = IBM_Plex_Mono({
+  variable: "--font-plex-mono",
+  subsets: ["latin"],
+  weight: ["400", "500"],
 });
 
 export const metadata: Metadata = {
@@ -17,6 +28,9 @@ export const metadata: Metadata = {
   description:
     "PoC scalping signals for BTCUSDT Perpetual — liquidity sweeps & turtle soup on 1m–1D. Not financial advice.",
 };
+
+/** Aplica el tema guardado antes del primer pintado (evita el flash) */
+const themeScript = `try{var t=localStorage.getItem("scalpineta:theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}`;
 
 export default function RootLayout({
   children,
@@ -26,8 +40,12 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
+      className={`${brand.variable} ${product.variable} ${data.variable} h-full antialiased`}
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );

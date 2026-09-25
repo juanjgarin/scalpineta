@@ -8,6 +8,7 @@ import {
 } from "@/lib/binance";
 import {
   applyMarketCandles,
+  closedSignature,
   mergeCandle,
   syncLastCandleWithMark,
   trimCandles,
@@ -15,7 +16,6 @@ import {
 import { detectPreview, detectSignals, signalKey } from "@/lib/patterns";
 import type { Candle, Interval, Signal, SignalsResponse } from "@/lib/types";
 
-const TICK_MS = 1000;
 const API_SYNC_MS = 3000;
 
 interface TickResponse {
@@ -27,7 +27,6 @@ interface TickResponse {
 export interface MarketStreamState {
   candles: Candle[];
   price: number | null;
-  tickCount: number;
   signals: Signal[];
   preview: Signal | null;
   latest: Signal | null;
@@ -41,7 +40,6 @@ export interface MarketStreamState {
 export function useMarketStream(interval: Interval): MarketStreamState {
   const [candles, setCandles] = useState<Candle[]>([]);
   const [price, setPrice] = useState<number | null>(null);
-  const [tickCount, setTickCount] = useState(0);
   const [connected, setConnected] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -57,7 +55,7 @@ export function useMarketStream(interval: Interval): MarketStreamState {
   const apiFailCountRef = useRef(0);
 
   const notifyNewSignals = useCallback((nextCandles: Candle[]) => {
-    const confirmed = detectSignals(nextCandles);
+    const confirmed = detectSignals(nextCandles, interval);
     const fresh = confirmed.filter(
       (s) => !knownSignalsRef.current.has(signalKey(s))
     );
@@ -71,13 +69,12 @@ export function useMarketStream(interval: Interval): MarketStreamState {
     }
 
     knownSignalsRef.current = new Set(confirmed.map(signalKey));
-  }, []);
+  }, [interval]);
 
   const applyMarketTick = useCallback(
     (tick: TickResponse) => {
       setPrice(tick.price);
       setUpdatedAt(tick.updatedAt);
-      setTickCount((n) => n + 1);
       apiFailCountRef.current = 0;
 
       setCandles((prev) => {
@@ -175,15 +172,6 @@ export function useMarketStream(interval: Interval): MarketStreamState {
   }, [pollTick]);
 
   useEffect(() => {
-    const timer = window.setInterval(() => {
-      if (price != null) {
-        setTickCount((n) => n + 1);
-      }
-    }, TICK_MS);
-    return () => window.clearInterval(timer);
-  }, [price]);
-
-  useEffect(() => {
     let alive = true;
 
     const ws = new WebSocket(binanceWsUrl(interval));
@@ -260,14 +248,33 @@ export function useMarketStream(interval: Interval): MarketStreamState {
     };
   }, [interval, notifyNewSignals]);
 
-  const signals = useMemo(() => detectSignals(candles), [candles]);
-  const preview = useMemo(() => detectPreview(candles), [candles]);
+  // Las señales confirmadas solo dependen de las velas cerradas: no recalcular
+  // 1500 velas con cada tick del precio sobre la vela abierta.
+  const closedKey = closedSignature(candles);
+  const signals = useMemo(
+    () => detectSignals(candles, interval),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [closedKey, interval]
+  );
+  const livePreview = useMemo(
+    () => detectPreview(candles, interval),
+    [candles, interval]
+  );
+
+  // Congela entrada/SL/TP del preview mientras siga siendo la misma señal en la
+  // vela abierta, así no salta con cada tick del mark price.
+  const [preview, setPreview] = useState<Signal | null>(null);
+  const livePreviewKey = livePreview ? signalKey(livePreview) : null;
+  const frozenPreviewKey = preview ? signalKey(preview) : null;
+  if (livePreviewKey !== frozenPreviewKey) {
+    setPreview(livePreview);
+  }
+
   const latest = signals[0] ?? preview ?? null;
 
   return {
     candles,
     price,
-    tickCount,
     signals,
     preview,
     latest,
